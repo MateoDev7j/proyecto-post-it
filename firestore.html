@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto-Firestore</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script defer type="module" src="index.js"></script>
+</head>
+<body>
+    <h1>Pizarra de Post-its Interactivos</h1>
+    <div id="add" class="circulo">+</div>
+    <div id="contenedores-lista-notas" ></div>
+    <div class="divNuevo" id="divNuevo">
+      <h2>Añadir</h2>
+      <span class="spanNuevo">titulo:</span> <input id="inputTitulo" type="text"><br>
+      <textarea id="inputContenido" rows="6" placeholder="Escribe los detalles de tu nota..."></textarea><br>
+      <button class="btnAlta" id="btnAlta">Alta de Nota</button><button class="btnAlta" id="btnCancelAlta">cancelar</button>
+    </div>
+    <br><br>
+    <div class="divNuevo" id="divActualizar">
+      <h2>Actualizar</h2>
+      <span class="spanNuevo">titulo:</span> <input id="inputTituloActualizar" type="text"><br>
+      <textarea id="inputContenidoActualizar" rows="6" placeholder="Escribe los detalles de tu nota..."></textarea><br>
+      <button class="btnAlta" id="btnActualizar">Actualizar</button><button class="btnAlta" id="btnCancelActualizar">cancelar</button>
+    </div>
+</body>
+</html>
