@@ -1,6 +1,7 @@
 *{
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif
+    font-family: Arial, Helvetica, sans-serif;
+    
 }
 html{
     max-width: 80vh;
@@ -8,15 +9,21 @@ html{
 }
 body{
     background-color: aliceblue;
-    background-image: url('../images/tableroMadera.jpg');
-    
+    background-image: url('../images//fondoWindowsXp.webp');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
     max-width: 80vh;
     max-height: 80vh;
 }
-h1{
+header{
     text-align: center;
     font-weight: bold;
     color: brown;
+    
+    background: linear-gradient(0.25turn, #000, #706c6c, #000);    
+    padding: 0.625rem;
+    border-radius: 0.625rem;
 }
 
 .circulo {
@@ -38,24 +45,32 @@ h1{
     color: #000000;
     line-height: 1;
     user-select: none;
+    font-size: large;
+    font-weight: 900;
 }
 .contenedorNotas{
     background-color: rgb(52, 47, 47);
     box-shadow: 0 20px 32px rgba(3, 2, 2, 0.2);
-    width: 250px;
+    width: 16.500rem;
 }
 .postTitulos{
-    background-color: chocolate;
+    background-color:#f2ff00;
+    /*background: linear-gradient(0.25turn, #f2ff00, #e0e084, #f2ff00);*/
     margin: 0;
     padding: 20px;
+    width: 16.500rem;
+    text-align: center;
 }
 .postContenido{
     margin: 0;
     padding: 10px;
-    background-color: rgb(168, 112, 73);
+    background: linear-gradient(0.25turn, #4a4645, #706c6c, #4a4645);    
     min-height: 250px;
     width: 250px;
     overflow-wrap: break-word;
+    color:white;
+    font-size: large;
+    font-weight: bold;
 }
 .divNuevo{
     display: none;
@@ -64,9 +79,9 @@ h1{
 .divNuevo {
     position: relative; 
     width: 100%;
-    max-width: 300px; 
-    margin-bottom: 20px; 
-    padding: 24px;
+    max-width: 18.75rem; 
+    margin-bottom: 1.25rem;
+    padding: 1.5rem;
     background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -144,4 +159,17 @@ h1{
 /* Marcador de posición (Placeholder) */
 .divNuevo textarea::placeholder {
     color: #a0aec0;
+}
+@media (max-width: 768px) {
+    header{
+        text-align: center;
+        font-weight: bold;
+        color: brown;
+        background-color: black;
+        padding: 0.625rem;
+        border-radius: 0.625rem;
+    }
+    body{
+        background-color: #2b6cb0;
+    }
 }

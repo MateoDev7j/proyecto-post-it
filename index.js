@@ -20,7 +20,7 @@
     caja.addEventListener("touchstart",(e)=>{
         e.preventDefault();
         console.log("tocas el div");
-        
+        caja.style.backgroundColor="yellow";
         /*caja.style.backgroundColor="green";*/
         offsetX=e.touches[0].clientX - caja.offsetLeft;
         offsetY=e.touches[0].clientY - caja.offsetTop;
@@ -29,7 +29,7 @@
     caja.addEventListener("touchend",(e)=>{
         e.preventDefault();
         console.log("levantas el dedo");
-        caja.style.backgroundColor="blue";
+        caja.style.backgroundColor="rgb(207, 200, 200)";
         let tiempoActual= Date.now();
         if(tiempoActual-btnaddUltimoToque<300){
             if(banderaAdd){
@@ -78,7 +78,7 @@ let liPagina = document.getElementById("contenedores-lista-notas");
         let documento = doc.data();
         let idContenedor = "post-" + doc.id;
         let idTitulo = "titulo-" + doc.id;
-        liPagina.innerHTML += "<div class=\"contenedorNotas\" id='" + idContenedor + "' style=\"position: absolute;  top:"+randomTop+"px; left:"+randomLeft+"px;\"> <h2 id='"+idTitulo+"' class=\"postTitulos\">"+ documento.titulo + "</h2><article class=\"postContenido\" ontouchend=\"borraruno(\'"+doc.id+"',event)\" ontouchstart=\"borrar(\'"+ doc.id +"\',event)\">" + documento.contenido + "</article><button id=\"btnActualizar\" onclick=\"actualizar(\'"+ doc.id +"\')\">Actualizar</button></div>";
+        liPagina.innerHTML += "<div class=\"contenedorNotas\" id='" + idContenedor + "' style=\"position: absolute;  top:"+randomTop+"px; left:"+randomLeft+"px;\"> <h2 id='"+idTitulo+"' class=\"postTitulos\">"+ documento.titulo + "</h2><article class=\"postContenido\" ontouchend=\"borraruno(\'"+doc.id+"',event)\" ontouchstart=\"borrar(\'"+ doc.id +"\',event)\">" + documento.contenido + "</article><br>&nbsp;</div>";
       }
       for(let doc of listaDatos){
         let idContenedor = "post-" + doc.id;
@@ -220,3 +220,14 @@ let liPagina = document.getElementById("contenedores-lista-notas");
   ************************************/
   
    cargarNotas(false);
+   /*cambiar color de titulo opcional*/
+   let tituloPost = document.getElementById("tituloPost");
+   
+   function coloresRandom(){
+        let r = Math.floor(Math.random() * 256);
+        let g = Math.floor(Math.random() * 256);
+        let b = Math.floor(Math.random() * 256);
+        tituloPost.style.color= "rgb("+r+","+g+","+b+")";
+        //document.body.style.backgroundColor="rgb("+r+","+g+","+b+")";
+    }
+    setInterval(coloresRandom, 2000);
