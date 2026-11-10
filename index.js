@@ -10,9 +10,32 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
         import {  initializeFirestore,getFirestore ,getDoc,updateDoc,collection, addDoc, getDocs, deleteDoc, doc} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
         import { firebaseConfig } from './firebase_config.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js';
         const app = initializeApp(firebaseConfig);
         // Get firestore
         const db = getFirestore(app);
+        //auth
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+        signInWithPopup(auth, provider)
+  .then((result) => {
+    // This gives you a Google Access Token. You can use it to access the Google API.
+    const credential = GoogleAuthProvider.credentialFromResult(result);
+    const token = credential.accessToken;
+    // The signed-in user info.
+    const user = result.user;
+    // IdP data available using getAdditionalUserInfo(result)
+    // ...
+  }).catch((error) => {
+    // Handle Errors here.
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    // The email of the user's account used.
+    const email = error.customData.email;
+    // The AuthCredential type that was used.
+    const credential = GoogleAuthProvider.credentialFromError(error);
+    // ...
+  });
     /*MANIPULACION DE DOM EVENTOS LOGIKA*/
     let caja = document.getElementById("add");
     var offsetX, offsetY;
