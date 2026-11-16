@@ -9,22 +9,41 @@
 </head>
 <body>
   <header>
-      <h1 id="tituloPost">Pizarra de Post-its Interactivos</h1>
+    <h1 id="tituloPost">Pizarra de Post-its Interactivos</h1>
   </header>
-    <div id="add" class="circulo">+</div>
-    <div id="contenedores-lista-notas" ></div>
-    <div class="divNuevo" id="divNuevo">
-      <h2>Añadir</h2>
-      <span class="spanNuevo">titulo:</span> <input id="inputTitulo" type="text"><br>
-      <textarea id="inputContenido" rows="6" placeholder="Escribe los detalles de tu nota..."></textarea><br>
-      <button class="btnAlta" id="btnAlta">Alta de Nota</button><button class="btnAlta" id="btnCancelAlta">cancelar</button>
+  <div id="formularioDeSesion">
+    <button id="btnLogin">Iniciar sesión con Google</button>
+    <button id="btnLog">Iniciar sesión con correo y email</button>
+    <div id="formEmail" class="formularioEmail">
+      <input id="inputEmail" type="text">
+      <input id="inputPassword" type="password">
+      <button id="btnLoginEmail">Iniciar sesión</button>
     </div>
-    <br><br>
-    <div class="divNuevo" id="divActualizar">
-      <h2>Actualizar</h2>
-      <span class="spanNuevo">titulo:</span> <input id="inputTituloActualizar" type="text"><br>
-      <textarea id="inputContenidoActualizar" rows="6" placeholder="Escribe los detalles de tu nota..."></textarea><br>
-      <button class="btnAlta" id="btnActualizar">Actualizar</button><button class="btnAlta" id="btnCancelActualizar">cancelar</button>
+    
+    <button id="btnReg">Registrarse</button>
+    <div id="formRegister" class="formularioEmail">
+      <input id="inputEmailRegister" type="text">
+      <input id="inputPasswordRegister" type="password">
+      <button id="btnRegister">Date de alta</button>
+    </div>
+
+  </div>
+  <div id="contenedor-padre">
+      <div id="add" class="circulo">+</div>
+      <div id="contenedores-lista-notas" ></div>
+      <div class="divNuevo" id="divNuevo">
+        <h2>Añadir</h2>
+        <span class="spanNuevo">titulo:</span> <input id="inputTitulo" type="text"><br>
+        <textarea id="inputContenido" rows="6" placeholder="Escribe los detalles de tu nota..."></textarea><br>
+        <button class="btnAlta" id="btnAlta">Alta de Nota</button><button class="btnAlta" id="btnCancelAlta">cancelar</button>
+      </div>
+      <br><br>
+      <div class="divNuevo" id="divActualizar">
+        <h2>Actualizar</h2>
+        <span class="spanNuevo">titulo:</span> <input id="inputTituloActualizar" type="text"><br>
+        <textarea id="inputContenidoActualizar" rows="6" placeholder="Escribe los detalles de tu nota..."></textarea><br>
+        <button class="btnAlta" id="btnActualizar">Actualizar</button><button class="btnAlta" id="btnCancelActualizar">cancelar</button>
+      </div>
     </div>
 </body>
 </html>

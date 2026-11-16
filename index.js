@@ -10,32 +10,96 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
         import {  initializeFirestore,getFirestore ,getDoc,updateDoc,collection, addDoc, getDocs, deleteDoc, doc} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
         import { firebaseConfig } from './firebase_config.js';
-        import { getAuth, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js';
+        //log con google y registro y log con Email y contraseña
+        import { getAuth, signInWithPopup, GoogleAuthProvider , 
+        signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js';
+
         const app = initializeApp(firebaseConfig);
         // Get firestore
         const db = getFirestore(app);
         //auth
         const auth = getAuth(app);
+        //LOGICA DE FORMULARIO GOOGLE
         const provider = new GoogleAuthProvider();
-        signInWithPopup(auth, provider)
-  .then((result) => {
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const token = credential.accessToken;
-    // The signed-in user info.
-    const user = result.user;
-    // IdP data available using getAdditionalUserInfo(result)
-    // ...
-  }).catch((error) => {
-    // Handle Errors here.
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    // The email of the user's account used.
-    const email = error.customData.email;
-    // The AuthCredential type that was used.
-    const credential = GoogleAuthProvider.credentialFromError(error);
-    // ...
-  });
+        document.getElementById("contenedor-padre").style.display="none";
+        let btnSesion = document.getElementById("btnLogin");
+        btnSesion.addEventListener("click",()=>{
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    // This gives you a Google Access Token. You can use it to access the Google API.
+                    const credential = GoogleAuthProvider.credentialFromResult(result);
+                    const token = credential.accessToken;
+                    // The signed-in user info.
+                    const user = result.user;
+                    // IdP data available using getAdditionalUserInfo(result)
+                    // ...
+                    document.getElementById("formularioDeSesion").style.display="none";
+
+                    document.getElementById("contenedor-padre").style.display="block";
+                }).catch((error) => {
+                    // Handle Errors here.
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    // The email of the user's account used.
+                    const email = error.customData.email;
+                    // The AuthCredential type that was used.
+                    const credential = GoogleAuthProvider.credentialFromError(error);
+                    // ...
+                    console.error("Código de error:", error.code);
+                    console.error("Mensaje:", error.message);
+                });
+        });
+        //LOGICA INISIO DE SESION CON EMAIL AND PASWORD
+        document.getElementById("formEmail").style.display="none";
+        const btnLog = document.getElementById("btnLog");
+        btnLog.addEventListener("click",()=>{document.getElementById("formEmail").style.display="block";})
+        const btnLoginEmail = document.getElementById("btnLoginEmail");
+        btnLoginEmail.addEventListener("click", () => {
+            const email = document.getElementById("inputEmail").value.trim();
+            const password = document.getElementById("inputPassword").value.trim();
+            document.getElementById("inputEmail").value='';
+            document.getElementById("inputPassword").value='';
+            signInWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                // El usuario inició sesión correctamente
+                const user = userCredential.user;
+                console.log("Usuario conectado:", user.email);
+                document.getElementById("contenedor-padre").style.display = "block";
+                document.getElementById("formularioDeSesion").style.display="none";
+
+                })
+                .catch((error) => {
+                console.error("Código de error:", error.code);
+                console.error("Mensaje:", error.message);
+                alert("Error al iniciar sesión: " + error.message);
+                });
+                document.getElementById("formEmail").style.display="none";
+            });
+        //LOGICA REGISTRO CON EMAIL AND PASSWORD
+        document.getElementById("formRegister").style.display="none";
+        const btnReg = document.getElementById("btnReg");
+        btnReg.addEventListener("click",()=>{document.getElementById("formRegister").style.display="block";});
+        const btnRegister = document.getElementById("btnRegister");
+        btnRegister.addEventListener("click", () => {
+            const emailReg = document.getElementById("inputEmailRegister").value.trim();
+            const passwordReg = document.getElementById("inputPasswordRegister").value.trim();
+
+            createUserWithEmailAndPassword(auth, emailReg, passwordReg)
+                .then((userCredential) => {
+                // Usuario creado e iniciado sesión automáticamente
+                const user = userCredential.user;
+                console.log("Usuario registrado:", user.email);
+                document.getElementById("contenedor-padre").style.display = "block";
+                document.getElementById("formularioDeSesion").style.display="none";
+
+                })
+                .catch((error) => {
+                console.error("Código de error:", error.code);
+                console.error("Mensaje:", error.message);
+                alert("Error al registrarse: " + error.message);
+                });
+                document.getElementById("formRegister").style.display="none";
+            });
     /*MANIPULACION DE DOM EVENTOS LOGIKA*/
     let caja = document.getElementById("add");
     var offsetX, offsetY;
