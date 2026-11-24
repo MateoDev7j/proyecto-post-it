@@ -19,6 +19,9 @@
         const db = getFirestore(app);
         //auth
         const auth = getAuth(app);
+        var user=null;
+        //BANDERA PARA FORMULARIOS ACTIVOS
+        let banderaForms=false;
         //LOGICA DE FORMULARIO GOOGLE
         const provider = new GoogleAuthProvider();
         document.getElementById("contenedor-padre").style.display="none";
@@ -30,12 +33,13 @@
                     const credential = GoogleAuthProvider.credentialFromResult(result);
                     const token = credential.accessToken;
                     // The signed-in user info.
-                    const user = result.user;
+                    user = result.user;
                     // IdP data available using getAdditionalUserInfo(result)
                     // ...
                     document.getElementById("formularioDeSesion").style.display="none";
 
                     document.getElementById("contenedor-padre").style.display="block";
+                    cargarNotas(false);
                 }).catch((error) => {
                     // Handle Errors here.
                     const errorCode = error.code;
@@ -52,53 +56,74 @@
         //LOGICA INISIO DE SESION CON EMAIL AND PASWORD
         document.getElementById("formEmail").style.display="none";
         const btnLog = document.getElementById("btnLog");
-        btnLog.addEventListener("click",()=>{document.getElementById("formEmail").style.display="block";})
+        btnLog.addEventListener("click",()=>{
+            banderaForms=true;
+            if(banderaForms){
+                banderaForms=false;
+                document.getElementById("formEmail").style.display="block";
+            }
+            
+        })
         const btnLoginEmail = document.getElementById("btnLoginEmail");
         btnLoginEmail.addEventListener("click", () => {
-            const email = document.getElementById("inputEmail").value.trim();
-            const password = document.getElementById("inputPassword").value.trim();
-            document.getElementById("inputEmail").value='';
-            document.getElementById("inputPassword").value='';
-            signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                // El usuario inició sesión correctamente
-                const user = userCredential.user;
-                console.log("Usuario conectado:", user.email);
-                document.getElementById("contenedor-padre").style.display = "block";
-                document.getElementById("formularioDeSesion").style.display="none";
+            
+                const email = document.getElementById("inputEmail").value.trim();
+                const password = document.getElementById("inputPassword").value.trim();
+                document.getElementById("inputEmail").value='';
+                document.getElementById("inputPassword").value='';
+                signInWithEmailAndPassword(auth, email, password)
+                    .then((userCredential) => {
+                    // El usuario inició sesión correctamente
+                    user = userCredential.user;
+                    console.log("Usuario conectado:", user.email);
+                    document.getElementById("contenedor-padre").style.display = "block";
+                    document.getElementById("formularioDeSesion").style.display="none";
+                    cargarNotas(false);
 
-                })
-                .catch((error) => {
-                console.error("Código de error:", error.code);
-                console.error("Mensaje:", error.message);
-                alert("Error al iniciar sesión: " + error.message);
-                });
-                document.getElementById("formEmail").style.display="none";
+                    })
+                    .catch((error) => {
+                    console.error("Código de error:", error.code);
+                    console.error("Mensaje:", error.message);
+                    alert("Error al iniciar sesión: " + error.message);
+                    });
+                    document.getElementById("formEmail").style.display="none";
+                    
             });
         //LOGICA REGISTRO CON EMAIL AND PASSWORD
         document.getElementById("formRegister").style.display="none";
         const btnReg = document.getElementById("btnReg");
-        btnReg.addEventListener("click",()=>{document.getElementById("formRegister").style.display="block";});
+        btnReg.addEventListener("click",()=>{
+            banderaForms=true;
+            if(banderaForms){
+                banderaForms=false;
+                document.getElementById("formRegister").style.display="block";
+            }
+        }
+        );
         const btnRegister = document.getElementById("btnRegister");
         btnRegister.addEventListener("click", () => {
-            const emailReg = document.getElementById("inputEmailRegister").value.trim();
-            const passwordReg = document.getElementById("inputPasswordRegister").value.trim();
+            
+            
+                const emailReg = document.getElementById("inputEmailRegister").value.trim();
+                const passwordReg = document.getElementById("inputPasswordRegister").value.trim();
 
-            createUserWithEmailAndPassword(auth, emailReg, passwordReg)
-                .then((userCredential) => {
-                // Usuario creado e iniciado sesión automáticamente
-                const user = userCredential.user;
-                console.log("Usuario registrado:", user.email);
-                document.getElementById("contenedor-padre").style.display = "block";
-                document.getElementById("formularioDeSesion").style.display="none";
+                createUserWithEmailAndPassword(auth, emailReg, passwordReg)
+                    .then((userCredential) => {
+                    // Usuario creado e iniciado sesión automáticamente
+                    user = userCredential.user;
+                    console.log("Usuario registrado:", user.email);
+                    document.getElementById("contenedor-padre").style.display = "block";
+                    document.getElementById("formularioDeSesion").style.display="none";
+                    cargarNotas(false);
 
-                })
-                .catch((error) => {
-                console.error("Código de error:", error.code);
-                console.error("Mensaje:", error.message);
-                alert("Error al registrarse: " + error.message);
-                });
-                document.getElementById("formRegister").style.display="none";
+                    })
+                    .catch((error) => {
+                    console.error("Código de error:", error.code);
+                    console.error("Mensaje:", error.message);
+                    alert("Error al registrarse: " + error.message);
+                    });
+                    document.getElementById("formRegister").style.display="none"
+    
             });
     /*MANIPULACION DE DOM EVENTOS LOGIKA*/
     let caja = document.getElementById("add");
@@ -152,41 +177,43 @@ let liPagina = document.getElementById("contenedores-lista-notas");
   var ooffsetX, ooffsetY;
   let zIndexActual = 1; 
   async function cargarNotas(primeraCarga){
-      const misDatos = await getDocs(collection(db, "notas"));
+    if(user!==null){
+        const misDatos = await getDocs(collection(db, "NOTAS-USUARIO-"+user.uid));
 
-      let listaDatos = misDatos.docs;
-        
-      if(!primeraCarga){
-            liPagina.innerHTML = "";
+        let listaDatos = misDatos.docs;
+            
+        if(!primeraCarga){
+                liPagina.innerHTML = "";
+            }
+        for(let doc of listaDatos){
+            let randomTop = Math.floor(Math.random() * 400) + 100;
+            let randomLeft = Math.floor(Math.random() * 400) + 50;
+            let documento = doc.data();
+            let idContenedor = "post-" + doc.id;
+            let idTitulo = "titulo-" + doc.id;
+            liPagina.innerHTML += "<div class=\"contenedorNotas\" id='" + idContenedor + "' style=\"position: absolute;  top:"+randomTop+"px; left:"+randomLeft+"px;\"> <h2 id='"+idTitulo+"' class=\"postTitulos\">"+ documento.titulo + "</h2><article class=\"postContenido\" ontouchend=\"borraruno(\'"+doc.id+"',event)\" ontouchstart=\"borrar(\'"+ doc.id +"\',event)\">" + documento.contenido + "</article><br>&nbsp;</div>";
         }
-       for(let doc of listaDatos){
-        let randomTop = Math.floor(Math.random() * 400) + 100;
-        let randomLeft = Math.floor(Math.random() * 400) + 50;
-        let documento = doc.data();
-        let idContenedor = "post-" + doc.id;
-        let idTitulo = "titulo-" + doc.id;
-        liPagina.innerHTML += "<div class=\"contenedorNotas\" id='" + idContenedor + "' style=\"position: absolute;  top:"+randomTop+"px; left:"+randomLeft+"px;\"> <h2 id='"+idTitulo+"' class=\"postTitulos\">"+ documento.titulo + "</h2><article class=\"postContenido\" ontouchend=\"borraruno(\'"+doc.id+"',event)\" ontouchstart=\"borrar(\'"+ doc.id +"\',event)\">" + documento.contenido + "</article><br>&nbsp;</div>";
-      }
-      for(let doc of listaDatos){
-        let idContenedor = "post-" + doc.id;
-        let idTitulo = "titulo-" + doc.id;
-        
-        let notaCompleta = document.getElementById(idContenedor);
-        let tituloNota = document.getElementById(idTitulo);
-        tituloNota.addEventListener("touchstart", (e) => {
-            e.preventDefault();
-            console.log("tocas el título: " + idTitulo);
-            zIndexActual++;
-            notaCompleta.style.zIndex=zIndexActual;
-            ooffsetX = e.touches[0].clientX - notaCompleta.offsetLeft;
-            ooffsetY = e.touches[0].clientY - notaCompleta.offsetTop;
-        });
-        tituloNota.addEventListener("touchmove", (e) => {
-            let toque = e.touches[0];
-            notaCompleta.style.top = toque.clientY - ooffsetY + "px";
-            notaCompleta.style.left = toque.clientX - ooffsetX + "px";
-        });
-      }
+        for(let doc of listaDatos){
+            let idContenedor = "post-" + doc.id;
+            let idTitulo = "titulo-" + doc.id;
+            
+            let notaCompleta = document.getElementById(idContenedor);
+            let tituloNota = document.getElementById(idTitulo);
+            tituloNota.addEventListener("touchstart", (e) => {
+                e.preventDefault();
+                console.log("tocas el título: " + idTitulo);
+                zIndexActual++;
+                notaCompleta.style.zIndex=zIndexActual;
+                ooffsetX = e.touches[0].clientX - notaCompleta.offsetLeft;
+                ooffsetY = e.touches[0].clientY - notaCompleta.offsetTop;
+            });
+            tituloNota.addEventListener("touchmove", (e) => {
+                let toque = e.touches[0];
+                notaCompleta.style.top = toque.clientY - ooffsetY + "px";
+                notaCompleta.style.left = toque.clientX - ooffsetX + "px";
+            });
+        }
+        }else{return;}
     }
 /*******************************************************
  *************** * **************************************
@@ -212,7 +239,7 @@ let liPagina = document.getElementById("contenedores-lista-notas");
             let confirmado =confirm("Estas seguro de eliminar");
             if(confirmado){
                 console.log('id a borrar: '+id);
-                await deleteDoc(doc(db,"notas",id));
+                await deleteDoc(doc(db,"NOTAS-USUARIO-"+user.uid,id));
                 cargarNotas(false);
             }
         }
@@ -229,7 +256,7 @@ let liPagina = document.getElementById("contenedores-lista-notas");
                 //logica para añadir un div o crear un div post it
                 console.log("hiciste un doble toque");
                 let divNota = document.getElementById(idNotaActualizar);
-                let miNota = await getDoc(doc(db,"notas",idNotaActualizar));
+                let miNota = await getDoc(doc(db,"NOTAS-USUARIO-"+user.uid,idNotaActualizar));
                 let datosEnjs = miNota.data();
                 document.getElementById("inputTituloActualizar").placeholder=datosEnjs.titulo;
                 document.getElementById("inputContenidoActualizar").placeholder=datosEnjs.contenido;
@@ -250,7 +277,7 @@ let liPagina = document.getElementById("contenedores-lista-notas");
     btnActualizar.addEventListener("click",async(e)=>{
         const tituloNuevo = document.getElementById("inputTituloActualizar").value.trim();
         const contenidoNuevo = document.getElementById("inputContenidoActualizar").value.trim();
-        let miNota = await getDoc(doc(db,"notas",idNotaActualizar));
+        let miNota = await getDoc(doc(db,"NOTAS-USUARIO-"+user.uid,idNotaActualizar));
         let datosEnjs = miNota.data();
         let datosActualizados = {
             titulo: datosEnjs.titulo,
@@ -262,7 +289,7 @@ let liPagina = document.getElementById("contenedores-lista-notas");
         if(contenidoNuevo!==""){
             datosActualizados.contenido=contenidoNuevo;
         }
-        await updateDoc(doc(db,"notas",idNotaActualizar),datosActualizados);
+        await updateDoc(doc(db,"NOTAS-USUARIO-"+user.uid,idNotaActualizar),datosActualizados);
         divActualizar.style.display="none";
         banderaActualizar=false;
         //insertarLibro();
@@ -299,14 +326,15 @@ let liPagina = document.getElementById("contenedores-lista-notas");
     
     }
     //Guardar datos
-    await addDoc(collection(db,"notas"), nuevoLibro);
+    await addDoc(collection(db,"NOTAS-USUARIO-"+user.uid), nuevoLibro);
     cargarNotas(false);
   }
   /*LOGICA DE ACTUALIZAR UN POST-IT**
   ***********************************
   ************************************/
-  
+  if(user!==null){
    cargarNotas(false);
+   }
    /*cambiar color de titulo opcional*/
    let tituloPost = document.getElementById("tituloPost");
    
