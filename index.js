@@ -14,6 +14,7 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider , 
         signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js';
 
+
         const app = initializeApp(firebaseConfig);
         // Get firestore
         const db = getFirestore(app);
@@ -179,26 +180,31 @@ let liPagina = document.getElementById("contenedores-lista-notas");
   async function cargarNotas(primeraCarga){
     if(user!==null){
         const misDatos = await getDocs(collection(db, "NOTAS-USUARIO-"+user.uid));
-
+        const colores = ["#f2ff00", "#ff7eb9", "#7afcff", "#feff9c", "#98ff98","#4a4645"];
+        const coloresTexto = ["#ffffff", "#1a1a1a", "#1d4ed8", "#dc2626"];
         let listaDatos = misDatos.docs;
             
         if(!primeraCarga){
                 liPagina.innerHTML = "";
             }
         for(let doc of listaDatos){
-            let randomTop = Math.floor(Math.random() * 400) + 100;
-            let randomLeft = Math.floor(Math.random() * 400) + 50;
-            let documento = doc.data();
-            let idContenedor = "post-" + doc.id;
-            let idTitulo = "titulo-" + doc.id;
-            liPagina.innerHTML += "<div class=\"contenedorNotas\" id='" + idContenedor + "' style=\"position: absolute;  top:"+randomTop+"px; left:"+randomLeft+"px;\"> <h2 id='"+idTitulo+"' class=\"postTitulos\">"+ documento.titulo + "</h2><article class=\"postContenido\" ontouchend=\"borraruno(\'"+doc.id+"',event)\" ontouchstart=\"borrar(\'"+ doc.id +"\',event)\">" + documento.contenido + "</article><br>&nbsp;</div>";
-        }
-        for(let doc of listaDatos){
-            let idContenedor = "post-" + doc.id;
-            let idTitulo = "titulo-" + doc.id;
             
+            let documento = doc.data();
+            let posTop=documento.top!==undefined ? documento.top:(Math.floor(Math.random() *400)+ 100);
+            let posLeft=documento.left!==undefined ? documento.left:(Math.floor(Math.random()*400) +50);
+
+            let idContenedor = "post-" + doc.id;
+            let idTitulo = "titulo-" + doc.id;
+            let idContenido = "contenido-"+doc.id;
+            liPagina.innerHTML += "<div class=\"contenedorNotas\" id='" + idContenedor + "' style=\"position: absolute;  top:"+posTop+"px; left:"+posLeft+"px;\"> <h2 id='"+idTitulo+"' class=\"postTitulos\">"+ documento.titulo + "</h2><article class=\"postContenido\" ontouchend=\"borraruno(\'"+doc.id+"',event)\" ontouchstart=\"borrar(\'"+ doc.id +"\',event)\" id='"+idContenido+"'>" + documento.contenido + "</article></div>";
+        }
+        for(let notaDoc of listaDatos){
+            let idContenedor = "post-" + notaDoc.id;
+            let idTitulo = "titulo-" + notaDoc.id;
+            let idContenido = "contenido-"+notaDoc.id;
             let notaCompleta = document.getElementById(idContenedor);
             let tituloNota = document.getElementById(idTitulo);
+            let contenidoNota = document.getElementById(idContenido);
             tituloNota.addEventListener("touchstart", (e) => {
                 e.preventDefault();
                 console.log("tocas el título: " + idTitulo);
@@ -212,6 +218,50 @@ let liPagina = document.getElementById("contenedores-lista-notas");
                 notaCompleta.style.top = toque.clientY - ooffsetY + "px";
                 notaCompleta.style.left = toque.clientX - ooffsetX + "px";
             });
+            /*Guarddamos en base de datos las posiciones de la nota*/
+            tituloNota.addEventListener("touchend", async () => {
+                let nuevoTop = parseInt(notaCompleta.style.top);
+                let nuevoLeft = parseInt(notaCompleta.style.left);
+
+                const referenciaNota = doc(db, "NOTAS-USUARIO-" + user.uid, notaDoc.id);
+                await updateDoc(referenciaNota, {
+                    top: nuevoTop,
+                    left: nuevoLeft
+                });
+            });
+            /*Añadimos opcion de colores*/
+            let divColores=document.createElement("div");
+            divColores.classList.add("divColores");
+            colores.forEach((color) => {
+                let circulo = document.createElement("div");
+                circulo.classList.add("btnColor");
+                circulo.style.backgroundColor = color;
+
+                circulo.addEventListener("click", () => {
+                // Cambia el color del título (o de notaCompleta / article si prefieres)
+                if(color==="#4a4645"){
+                contenidoNota.style.background = `linear-gradient(0.25turn, ${color}, #706c6c, ${color})`;
+                }else{contenidoNota.style.background = `linear-gradient(0.25turn, ${color}, #ffff, ${color})`;}
+            });
+            divColores.appendChild(circulo);
+        });
+        notaCompleta.appendChild(divColores);
+
+        let divColoresTexto = document.createElement("div");
+        divColoresTexto.classList.add("divColoresTexto");
+
+        coloresTexto.forEach((colorTexto) => {
+            let circuloTexto = document.createElement("div");
+            circuloTexto.classList.add("btnColorTexto");
+            circuloTexto.style.backgroundColor = colorTexto;
+
+            circuloTexto.addEventListener("click", () => {
+                contenidoNota.style.color = colorTexto;
+            });
+
+            divColoresTexto.appendChild(circuloTexto);
+        });
+        notaCompleta.appendChild(divColoresTexto);
         }
         }else{return;}
     }
