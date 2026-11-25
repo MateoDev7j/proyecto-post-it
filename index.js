@@ -6,21 +6,55 @@
     const app = initializeApp(firebaseConfig);
     // Get firestore
     // Forzamos la conexión especificando tanto el proyecto como el ID de la base de datos por defecto
-    const db = getFirestore(app);  */   
+    const db = getFirestore(app);  */
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-        import {  initializeFirestore,getFirestore ,getDoc,updateDoc,collection, addDoc, getDocs, deleteDoc, doc} from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+        import {  initializeFirestore,getFirestore ,getDoc,updateDoc,collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
         import { firebaseConfig } from './firebase_config.js';
         //log con google y registro y log con Email y contraseña
         import { getAuth, signInWithPopup, GoogleAuthProvider , 
-        signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js';
+        signInWithEmailAndPassword, createUserWithEmailAndPassword , onAuthStateChanged , signOut } from 'https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js';
 
-
+        
         const app = initializeApp(firebaseConfig);
         // Get firestore
         const db = getFirestore(app);
         //auth
         const auth = getAuth(app);
         var user=null;
+        var desuscribirNotas = null;
+        /*VERIFICAMOS SESION*/
+        onAuthStateChanged(auth,(usuarioActual)=>{
+            if(usuarioActual){
+                user=usuarioActual;
+                console.log("Sesion recuperada de: " , user.email);
+
+                document.getElementById('formularioDeSesion').style.display="none";
+                document.getElementById('contenedor-padre').style.display="block";
+                document.getElementById('btnLogOut').style.display="block";
+
+                cargarNotas();
+            }
+            else{
+                user=null;
+                if (desuscribirNotas) {
+                    desuscribirNotas();
+                    desuscribirNotas = null;
+                }
+                liPagina.innerHTML = "";
+                document.getElementById('contenedor-padre').style.display="none";
+                document.getElementById('formularioDeSesion').style.display="block";
+                document.getElementById('btnLogOut').style.display="none";
+
+            }
+
+        });
+        document.getElementById('btnCerrarSesion').addEventListener("click", () => {
+            signOut(auth).then(() => {
+                    console.log("Sesión cerrada correctamente");
+            }).catch((error) => {
+                    console.error("Error al cerrar sesión:", error);
+            });
+        });
         //BANDERA PARA FORMULARIOS ACTIVOS
         let banderaForms=false;
         //LOGICA DE FORMULARIO GOOGLE
@@ -37,10 +71,6 @@
                     user = result.user;
                     // IdP data available using getAdditionalUserInfo(result)
                     // ...
-                    document.getElementById("formularioDeSesion").style.display="none";
-
-                    document.getElementById("contenedor-padre").style.display="block";
-                    cargarNotas(false);
                 }).catch((error) => {
                     // Handle Errors here.
                     const errorCode = error.code;
@@ -55,19 +85,20 @@
                 });
         });
         //LOGICA INISIO DE SESION CON EMAIL AND PASWORD
+        const formEmail = document.getElementById("formEmail");
+        const formRegister = document.getElementById("formRegister");
+
+        formEmail.style.display = "none";
+        formRegister.style.display = "none";
         document.getElementById("formEmail").style.display="none";
         const btnLog = document.getElementById("btnLog");
         btnLog.addEventListener("click",()=>{
-            banderaForms=true;
-            if(banderaForms){
-                banderaForms=false;
-                document.getElementById("formEmail").style.display="block";
-            }
+            formRegister.style.display = "none";
+            formEmail.style.display = formEmail.style.display === "none" ? "block" : "none";
             
         })
         const btnLoginEmail = document.getElementById("btnLoginEmail");
         btnLoginEmail.addEventListener("click", () => {
-            
                 const email = document.getElementById("inputEmail").value.trim();
                 const password = document.getElementById("inputPassword").value.trim();
                 document.getElementById("inputEmail").value='';
@@ -77,10 +108,6 @@
                     // El usuario inició sesión correctamente
                     user = userCredential.user;
                     console.log("Usuario conectado:", user.email);
-                    document.getElementById("contenedor-padre").style.display = "block";
-                    document.getElementById("formularioDeSesion").style.display="none";
-                    cargarNotas(false);
-
                     })
                     .catch((error) => {
                     console.error("Código de error:", error.code);
@@ -88,17 +115,13 @@
                     alert("Error al iniciar sesión: " + error.message);
                     });
                     document.getElementById("formEmail").style.display="none";
-                    
             });
         //LOGICA REGISTRO CON EMAIL AND PASSWORD
         document.getElementById("formRegister").style.display="none";
         const btnReg = document.getElementById("btnReg");
         btnReg.addEventListener("click",()=>{
-            banderaForms=true;
-            if(banderaForms){
-                banderaForms=false;
-                document.getElementById("formRegister").style.display="block";
-            }
+            formEmail.style.display = "none"; 
+            formRegister.style.display = formRegister.style.display === "none" ? "block" : "none";
         }
         );
         const btnRegister = document.getElementById("btnRegister");
@@ -113,10 +136,6 @@
                     // Usuario creado e iniciado sesión automáticamente
                     user = userCredential.user;
                     console.log("Usuario registrado:", user.email);
-                    document.getElementById("contenedor-padre").style.display = "block";
-                    document.getElementById("formularioDeSesion").style.display="none";
-                    cargarNotas(false);
-
                     })
                     .catch((error) => {
                     console.error("Código de error:", error.code);
@@ -177,16 +196,19 @@ let liPagina = document.getElementById("contenedores-lista-notas");
 //Leer datos
   var ooffsetX, ooffsetY;
   let zIndexActual = 1; 
-  async function cargarNotas(primeraCarga){
+  async function cargarNotas(){
     if(user!==null){
-        const misDatos = await getDocs(collection(db, "NOTAS-USUARIO-"+user.uid));
+        if(desuscribirNotas){
+            desuscribirNotas()
+        };
+        const rutaColeccion = collection(db, "NOTAS-USUARIO-" + user.uid);
+
+    desuscribirNotas = onSnapshot(rutaColeccion, (misDatos) => {
         const colores = ["#f2ff00", "#ff7eb9", "#7afcff", "#feff9c", "#98ff98","#4a4645"];
         const coloresTexto = ["#ffffff", "#1a1a1a", "#1d4ed8", "#dc2626"];
         let listaDatos = misDatos.docs;
+        liPagina.innerHTML = "";
             
-        if(!primeraCarga){
-                liPagina.innerHTML = "";
-            }
         for(let doc of listaDatos){
             
             let documento = doc.data();
@@ -262,7 +284,8 @@ let liPagina = document.getElementById("contenedores-lista-notas");
             divColoresTexto.appendChild(circuloTexto);
         });
         notaCompleta.appendChild(divColoresTexto);
-        }
+        
+        }});
         }else{return;}
     }
 /*******************************************************
@@ -290,7 +313,7 @@ let liPagina = document.getElementById("contenedores-lista-notas");
             if(confirmado){
                 console.log('id a borrar: '+id);
                 await deleteDoc(doc(db,"NOTAS-USUARIO-"+user.uid,id));
-                cargarNotas(false);
+                cargarNotas();
             }
         }
         let tiempoActual= Date.now();
@@ -345,7 +368,7 @@ let liPagina = document.getElementById("contenedores-lista-notas");
         //insertarLibro();
         document.getElementById("inputTituloActualizar").value="";
         document.getElementById("inputContenidoActualizar").value="";
-        cargarNotas(false);
+        cargarNotas();
     });
     /* LOGICA PARA AÑADIR UN NUEVO POSTÑIT */
     let btnAlta= document.getElementById("btnAlta");
@@ -377,14 +400,9 @@ let liPagina = document.getElementById("contenedores-lista-notas");
     }
     //Guardar datos
     await addDoc(collection(db,"NOTAS-USUARIO-"+user.uid), nuevoLibro);
-    cargarNotas(false);
+    cargarNotas();
   }
-  /*LOGICA DE ACTUALIZAR UN POST-IT**
-  ***********************************
-  ************************************/
-  if(user!==null){
-   cargarNotas(false);
-   }
+  
    /*cambiar color de titulo opcional*/
    let tituloPost = document.getElementById("tituloPost");
    
